@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { ResponseMDB } from '../interfaces/interfaces';
+import { CreditsResponse, MovieDetail, ResponseMDB } from '../interfaces/interfaces';
 
 const URL = environment.url;
 const APIKEY = environment.apiKey;
@@ -11,6 +11,7 @@ const APIKEY = environment.apiKey;
 })
 export class MoviesService {
   constructor(private http: HttpClient) {}
+  private popularPages = 0;
 
   private runQuery<T>(query: string) {
     query = URL + query;
@@ -40,8 +41,17 @@ export class MoviesService {
   }
 
   getPopular() {
+    this.popularPages++;
     return this.runQuery<ResponseMDB>(
-      `/discover/movie?sort_by=popularity.desc`
+      `/discover/movie?sort_by=popularity.desc&page=${this.popularPages}`
     );
+  }
+
+  getMovieDetail(id: string) {
+    return this.runQuery<MovieDetail>(`/movie/${id}?a=1`);
+  }
+
+  getMovieCredits(id: string) {
+    return this.runQuery<CreditsResponse>(`/movie/${id}/credits?a=1`);
   }
 }
