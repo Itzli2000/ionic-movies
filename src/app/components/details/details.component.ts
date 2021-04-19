@@ -1,3 +1,4 @@
+import { DataLocalService } from './../../services/data-local.service';
 import { Cast, MovieDetail } from './../../interfaces/interfaces';
 import { MoviesService } from './../../services/movies.service';
 import { Component, Input, OnInit } from '@angular/core';
@@ -13,25 +14,28 @@ export class DetailsComponent implements OnInit {
   movie: MovieDetail;
   actors: Cast[] = [];
   hideText = 150;
+  favoriteMovie = false;
 
   slideCastOptions = {
     slidesPerView: 3.3,
     freemode: true,
-    spacebetween: -5
+    spacebetween: -5,
   };
 
   constructor(
     private moviesService: MoviesService,
-    private modalCtrl: ModalController
-    ) {}
+    private modalCtrl: ModalController,
+    private dataLocal: DataLocalService
+  ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     this.moviesService
       .getMovieDetail(this.id)
       .subscribe((data) => (this.movie = data));
     this.moviesService.getMovieCredits(this.id).subscribe((data) => {
       this.actors = data.cast;
     });
+    this.favoriteMovie = await this.dataLocal.isFavorite(this.id);
   }
 
   showHideText() {
@@ -45,6 +49,7 @@ export class DetailsComponent implements OnInit {
   }
 
   favorite() {
-    console.log('favorito', this.movie.id);
+    this.dataLocal.saveMovie(this.movie);
+    this.favoriteMovie = !this.favoriteMovie;
   }
 }
